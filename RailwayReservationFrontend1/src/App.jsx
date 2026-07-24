@@ -7,7 +7,6 @@ export default function App() {
   return (
     <div>
       {/* <Navbar /> */}
-      <div>Hello Rahul</div>
       <Router></Router>
       {/* <Footer /> */}
     </div>
