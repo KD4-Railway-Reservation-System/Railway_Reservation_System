@@ -6,10 +6,9 @@ import Footer from "./components/Footer";
 export default function App() {
   return (
     <div>
-      {/* <Navbar /> */}
-      <div>Hello Rahul</div>
+      <Navbar />
       <Router></Router>
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }
