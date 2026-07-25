@@ -5,7 +5,6 @@ export default function Footer() {
     <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 py-12 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <span className="text-lg font-bold text-white">RailReserve</span>
@@ -15,8 +14,6 @@ export default function Footer() {
               for seamless nationwide travel booking.
             </p>
           </div>
-
-          {/* Quick Links */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
               Quick Links
@@ -48,8 +45,6 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* Microservice Architecture */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
               System Services
@@ -69,8 +64,6 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* Support */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
               Support & Help

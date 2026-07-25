@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import TrainSearchPage from "../pages/TrainSearchPage";
 import BookingPage from "../pages/BookingPage";
@@ -11,7 +11,7 @@ import LoginPage from "../pages/LoginPage";
 
 export default function RouterPath() {
   return (
-    <div className="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen flex flex-col justify-between selection:bg-indigo-500 hover:text-white">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/trains" element={<TrainSearchPage />} />
@@ -19,7 +19,7 @@ export default function RouterPath() {
         <Route path="/pnr-status" element={<PnrStatusPage />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/signup" element={<RegisterPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </div>
