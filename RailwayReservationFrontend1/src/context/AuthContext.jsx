@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in from localStorage
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       try {
@@ -61,14 +60,12 @@ export function AuthProvider({ children }) {
         role: res.data?.role || "USER",
         fullName: res.data?.fullName || fullName,
       };
-
       localStorage.setItem("token", res.data?.token || "dummy-token");
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
 
       return { success: true, user: userData };
     } catch (err) {
-      // Fallback for frontend testing
       const userData = {
         email: email,
         userId: 1,
