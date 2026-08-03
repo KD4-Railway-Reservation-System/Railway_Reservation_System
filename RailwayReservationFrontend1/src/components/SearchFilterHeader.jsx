@@ -29,8 +29,8 @@ export default function SearchFilterHeader({
         >
           <option value="">All Source Stations</option>
           {stations.map((s) => (
-            <option key={s.id} value={s.id || s.stationId}>
-              {s.city} ({s.stationCode})
+            <option key={s.id || s.stationCode} value={s.stationName || s.city}>
+              {s.city} ({s.stationCode}) - {s.stationName}
             </option>
           ))}
         </select>
@@ -49,8 +49,8 @@ export default function SearchFilterHeader({
         >
           <option value="">All Destination Stations</option>
           {stations.map((s) => (
-            <option key={s.id} value={s.id || s.stationId}>
-              {s.city} ({s.stationCode})
+            <option key={s.id || s.stationCode} value={s.stationName || s.city}>
+              {s.city} ({s.stationCode}) - {s.stationName}
             </option>
           ))}
         </select>

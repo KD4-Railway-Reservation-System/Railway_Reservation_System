@@ -8,16 +8,18 @@ import RegisterPage from "../pages/RegisterPage";
 import AdminDashboard from "../pages/AdminDashboard";
 import PnrStatusPage from "../pages/PnrStatusPage";
 import LoginPage from "../pages/LoginPage";
+import NotificationsPage from "../pages/NotificationsPage";
 
 export default function RouterPath() {
   return (
-    <div className="min-h-screen flex flex-col justify-between selection:bg-indigo-500 hover:text-white">
+    <div className="min-h-screen flex flex-col justify-between selection:bg-indigo-500">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/trains" element={<TrainSearchPage />} />
         <Route path="/book/:trainId" element={<BookingPage />} />
         <Route path="/pnr-status" element={<PnrStatusPage />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<RegisterPage />} />
         <Route path="/admin" element={<AdminDashboard />} />

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { bookingApi, paymentApi, notificationApi } from "../api/apiService";
 import PnrResultCard from "../components/PnrResultCard";
+import { Search, Ticket, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function PnrStatusPage() {
   const [pnrQuery, setPnrQuery] = useState("");
@@ -21,58 +22,80 @@ export default function PnrStatusPage() {
     setPayment(null);
     setSuccessMsg(null);
 
-    try {
-      const res = await bookingApi.getAllBookings();
-      const match = (res.data || []).find(
-        (b) => b.pnr.trim() === pnrQuery.trim(),
-      );
+    const cleanPnr = pnrQuery.trim().toUpperCase();
 
-      if (!match) {
-        setError(`No active ticket found for PNR: ${pnrQuery}`);
+    try {
+      // Fetch booking by PNR from Booking Service
+      const res = await bookingApi.getBookingByPnr(cleanPnr);
+      const bookingData = res.data?.booking || res.data;
+      if (bookingData && (bookingData.pnrNumber || bookingData.pnr)) {
+        setBooking(bookingData);
       } else {
-        setBooking(match);
-        try {
-          const payRes = await paymentApi.getPaymentByPnr(match.pnr);
-          setPayment(payRes.data);
-        } catch (payErr) {
-          console.log("Payment record lookup error", payErr);
-        }
+        throw new Error("Not found in API");
+      }
+
+      // Fetch payment record by PNR from Payment Service
+      try {
+        const payRes = await paymentApi.getPaymentByPnr(cleanPnr);
+        const payData = payRes.data?.payment || payRes.data;
+        setPayment(payData);
+      } catch (payErr) {
+        console.log("No payment record found for PNR", payErr);
       }
     } catch (err) {
-      setError("Failed to fetch PNR status.");
+      console.log("PNR Search API notice, checking local storage backup", err);
+      try {
+        const localList = JSON.parse(localStorage.getItem("railreserve_local_bookings") || "[]");
+        const found = localList.find((b) => (b.pnrNumber || b.pnr) === cleanPnr);
+        if (found) {
+          setBooking(found);
+          setError(null);
+        } else {
+          setError(`No active booking record found for PNR: ${cleanPnr}`);
+        }
+      } catch (lErr) {
+        setError(`No active booking record found for PNR: ${cleanPnr}`);
+      }
     }
     setLoading(false);
   }
 
   async function handleCancelTicket() {
-    if (!booking || !window.confirm(`Cancel PNR ${booking.pnr}?`)) return;
+    const pnr = booking?.pnrNumber || booking?.pnr || pnrQuery;
+    if (!pnr || !window.confirm(`Are you sure you want to cancel PNR ${pnr}?`)) return;
 
     setCancelling(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
-      const res = await bookingApi.cancelBooking(booking.bookingId);
-      setBooking(res.data);
+      // 1. Cancel booking
+      const res = await bookingApi.cancelBooking(pnr);
+      const updatedBooking = res.data?.booking || res.data;
+      setBooking(updatedBooking);
 
+      // 2. Process refund
       try {
-        const payRes = await paymentApi.processRefund(booking.pnr);
-        setPayment(payRes.data);
-      } catch (e) {
-        console.log("Refund process error", e);
+        const refundRes = await paymentApi.processRefund(pnr);
+        setPayment(refundRes.data?.payment || refundRes.data);
+      } catch (rErr) {
+        console.log("Refund process notice", rErr);
       }
 
+      // 3. Send cancellation notification
       try {
-        await notificationApi.sendCancellationNotice({
-          recipientEmail: "passenger@railway.com",
-          subject: `Ticket Cancelled - PNR: ${booking.pnr}`,
-          message: `Your booking (PNR: ${booking.pnr}) has been cancelled.`,
-          pnr: booking.pnr,
+        await notificationApi.sendNotification({
+          userId: booking?.userId || 1,
+          recipient: booking?.userEmail || "passenger@railway.com",
+          type: "IN_APP",
+          subject: `Ticket Cancelled - PNR: ${pnr}`,
+          message: `Your booking (PNR: ${pnr}) has been cancelled and refund has been issued.`,
         });
-      } catch (e) {
-        console.log("Notification error", e);
+      } catch (nErr) {
+        console.log("Notification notice", nErr);
       }
 
-      setSuccessMsg("Ticket cancelled successfully! Refund processed.");
+      setSuccessMsg(`Ticket PNR ${pnr} cancelled successfully! Refund has been issued.`);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to cancel ticket.");
     }
@@ -81,44 +104,52 @@ export default function PnrStatusPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <div className="bg-slate-900 border border-slate-700 text-white p-6 rounded-lg text-center space-y-4 shadow">
-        <h2 className="text-xl font-bold">Check PNR Status</h2>
-        <p className="text-xs text-slate-400">
-          Enter your 10-digit Passenger Name Record (PNR) number
-        </p>
+      <div className="bg-white/95 backdrop-blur-md border border-blue-100 text-slate-900 p-8 rounded-3xl text-center space-y-4 shadow-xl">
+        <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto font-black shadow-md">
+          <Ticket className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-slate-900">Check Live PNR Status</h2>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Enter your 10-digit Passenger Name Record (PNR) number to inspect live reservation details
+          </p>
+        </div>
 
         <form
           onSubmit={handleSearchPNR}
-          className="flex gap-2 max-w-md mx-auto"
+          className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2"
         >
           <input
             type="text"
             required
-            maxLength={10}
+            maxLength={15}
             value={pnrQuery}
             onChange={(e) => setPnrQuery(e.target.value.toUpperCase())}
-            placeholder="e.g. PNR1234567"
-            className="flex-1 bg-slate-800 border border-slate-600 rounded p-2 text-sm text-center font-mono uppercase text-white"
+            placeholder="e.g. PNR84739210"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-center font-black tracking-widest uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition"
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded text-white text-xs"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-6 py-3 rounded-xl text-xs transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            {loading ? "Searching..." : "Check PNR"}
+            <Search className="w-4 h-4" />
+            <span>{loading ? "Searching..." : "Check PNR"}</span>
           </button>
         </form>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-900/50 border border-red-500 text-red-200 text-xs rounded text-center">
-          {error}
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 bg-green-900/50 border border-green-500 text-green-200 text-xs rounded text-center">
-          {successMsg}
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{successMsg}</span>
         </div>
       )}
 

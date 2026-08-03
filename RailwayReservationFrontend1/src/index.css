@@ -1,29 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500 selection:text-white;
+    font-family: 'Outfit', sans-serif;
+    color: #0f172a;
+    background-color: #f8fafc;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(30, 27, 75, 0.5) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(17, 24, 39, 0.9) 0px, transparent 100%);
+      linear-gradient(135deg, rgba(248, 250, 252, 0.88), rgba(239, 246, 255, 0.92)),
+      url('/hero_bg.png');
+    background-size: cover;
+    background-position: center;
     background-attachment: fixed;
+    min-height: 100vh;
   }
 }
 
-/* Custom Glassmorphism */
+/* Custom Typography & Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 50%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Glassmorphism - Vibrant Bright */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(219, 234, 254, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.12);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -4px rgba(30, 58, 138, 0.08);
 }
 
 .glass-card-hover {
@@ -31,10 +51,32 @@
 }
 
 .glass-card-hover:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(99, 102, 241, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.25);
+  background: #ffffff;
+  border-color: rgba(37, 99, 235, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -12px rgba(37, 99, 235, 0.18);
+}
+
+/* Hero & Station Background Banners */
+.hero-banner-bg {
+  background-image: linear-gradient(to right, rgba(29, 78, 216, 0.92), rgba(30, 58, 138, 0.88), rgba(30, 64, 175, 0.92)), url('/hero_bg.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.station-banner-bg {
+  background-image: linear-gradient(to right, rgba(29, 78, 216, 0.9), rgba(37, 99, 235, 0.82), rgba(30, 58, 138, 0.9)), url('/station_bg.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Glow Effects */
+.glow-indigo {
+  box-shadow: 0 0 25px -5px rgba(37, 99, 235, 0.25);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.25);
 }
 
 /* Custom Scrollbar */
@@ -44,16 +86,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
 /* Shimmer animation */
@@ -63,7 +105,67 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
   animation: shimmer 2.5s infinite;
+}
+
+/* ===================================================
+   BRIGHT / LIGHT THEME AS DEFAULT & THEME OVERRIDES
+   =================================================== */
+
+[data-theme="bright"] body,
+body.theme-bright,
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  background-image: 
+    linear-gradient(135deg, rgba(248, 250, 252, 0.88), rgba(239, 246, 255, 0.92)),
+    url('/hero_bg.png');
+}
+
+/* Theme 2: Dark Theme Overrides */
+[data-theme="dark"] body,
+body.theme-dark {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  background-image: 
+    linear-gradient(135deg, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.94)),
+    url('/hero_bg.png') !important;
+}
+
+[data-theme="dark"] .glass-panel,
+body.theme-dark .glass-panel {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .glass-card,
+body.theme-dark .glass-card {
+  background: rgba(30, 41, 59, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+/* Theme 3: Night Theme (Warm OLED Amber) */
+[data-theme="night"] body,
+body.theme-night {
+  background-color: #000000 !important;
+  color: #fef3c7 !important;
+  background-image: 
+    linear-gradient(135deg, rgba(120, 53, 15, 0.45), rgba(9, 9, 11, 0.95)),
+    url('/hero_bg.png') !important;
+}
+
+[data-theme="night"] .glass-panel,
+body.theme-night .glass-panel {
+  background: rgba(18, 18, 20, 0.92) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+[data-theme="night"] .glass-card,
+body.theme-night .glass-card {
+  background: rgba(24, 24, 27, 0.88) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
 }
