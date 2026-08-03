@@ -33,6 +33,15 @@ public class AuthController {
                 .body(authService.register(request));
     }
 
+    @PostMapping("/create-admin")
+    public ResponseEntity<AuthResponse> createAdmin(
+            @Valid @RequestBody RegisterRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(authService.createAdmin(request));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request) {

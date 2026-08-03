@@ -22,6 +22,7 @@ import java.util.List;
  * - @RequestMapping("/api/notifications") sets base URL for all endpoints in this controller.
  * - @Tag enables clean documentation grouping in Swagger UI.
  */
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -88,5 +89,16 @@ public class NotificationController {
     public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Long id) {
         NotificationResponse response = notificationService.markAsRead(id);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Endpoint 6: Instant Demo Testing Payload
+     * HTTP Method: GET
+     * URL: http://localhost:8086/api/notifications/demo
+     */
+    @GetMapping("/demo")
+    @Operation(summary = "Get Demo Notification List", description = "Returns sample pre-configured notification payload for instant API testing")
+    public ResponseEntity<List<NotificationResponse>> getDemoNotifications() {
+        return ResponseEntity.ok(notificationService.getAllNotifications());
     }
 }

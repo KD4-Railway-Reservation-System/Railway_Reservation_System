@@ -29,4 +29,6 @@ public class PaymentRequest {
 
     @NotBlank(message = "Payment method is required (UPI, CREDIT_CARD, DEBIT_CARD, NET_BANKING)")
     private String paymentMethod;
+
+    private String transactionId;
 }

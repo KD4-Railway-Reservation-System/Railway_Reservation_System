@@ -54,7 +54,20 @@ public class BookingServiceImpl implements BookingService {
                 .bookingTime(LocalDateTime.now())
                 .build();
 
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // Automatically decrement available seats in Train Service
+        try {
+            String trainIdentifier = request.getTrainId() != null ? String.valueOf(request.getTrainId()) : request.getTrainNumber();
+            if (trainIdentifier != null && !trainIdentifier.isBlank()) {
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                restTemplate.put("http://localhost:8082/api/trains/" + trainIdentifier + "/book-seat?seats=1", null);
+            }
+        } catch (Exception e) {
+            System.err.println("Notice: Seat reduction notification to Train Service: " + e.getMessage());
+        }
+
+        return savedBooking;
     }
 
     @Override
@@ -88,6 +101,18 @@ public class BookingServiceImpl implements BookingService {
         if (optionalBooking.isPresent()) {
             Booking booking = optionalBooking.get();
             booking.setStatus("CANCELLED");
+
+            // Automatically restore available seats in Train Service
+            try {
+                String trainIdentifier = booking.getTrainId() != null ? String.valueOf(booking.getTrainId()) : booking.getTrainNumber();
+                if (trainIdentifier != null && !trainIdentifier.isBlank()) {
+                    org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                    restTemplate.put("http://localhost:8082/api/trains/" + trainIdentifier + "/cancel-seat?seats=1", null);
+                }
+            } catch (Exception e) {
+                System.err.println("Notice: Seat restoration notification to Train Service: " + e.getMessage());
+            }
+
             return Optional.of(bookingRepository.save(booking));
         }
         return Optional.empty();

@@ -3,7 +3,7 @@ title Railway Reservation System - Launch Full Stack (Backend + Frontend)
 cls
 
 echo ============================================================
-echo 🚀 STARTING ENTIRE RAILWAY RESERVATION SYSTEM (FULL STACK)
+echo STARTING ENTIRE RAILWAY RESERVATION SYSTEM (FULL STACK)
 echo ============================================================
 echo.
 

@@ -43,7 +43,21 @@ const NOTIFICATION_SERVICE = process.env.NOTIFICATION_SERVICE_URL || 'http://loc
 // ============================================================
 
 // Enable CORS so web browsers and frontend applications can call this gateway
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+}));
+
+// Handle OPTIONS preflight requests immediately to prevent CORS blockage
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(204);
+});
 
 /**
  * Middleware 1: Simple Request Logger
@@ -59,6 +73,11 @@ app.use((req, res, next) => {
  * Checks if the request contains a valid Bearer JWT token before allowing access to private routes.
  */
 function verifyJwtToken(req, res, next) {
+  // Allow OPTIONS preflight requests to pass through without token verification
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   // Read "Authorization" header sent by client (e.g., "Bearer eyJhbGci...")
   const authHeader = req.headers['authorization'];
 
@@ -132,9 +151,10 @@ app.get('/health', (req, res) => {
  * Client URL:  http://localhost:8080/api/auth/login or /register
  * Target URL:  http://localhost:8081/api/auth/*
  */
-app.use('/api/auth', createProxyMiddleware({
+app.use(createProxyMiddleware({
   target: AUTH_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/auth',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,
@@ -144,13 +164,14 @@ app.use('/api/auth', createProxyMiddleware({
 }));
 
 /**
- * Route 2: Train Service (PROTECTED - Token Required)
+ * Route 2: Train Service (PUBLIC - Train Search & Timings)
  * Client URL:  http://localhost:8080/api/trains/*
  * Target URL:  http://localhost:8082/api/trains/*
  */
-app.use('/api/trains', verifyJwtToken, createProxyMiddleware({
+app.use(createProxyMiddleware({
   target: TRAIN_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/trains',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,
@@ -164,9 +185,11 @@ app.use('/api/trains', verifyJwtToken, createProxyMiddleware({
  * Client URL:  http://localhost:8080/api/bookings/*
  * Target URL:  http://localhost:8083/api/bookings/*
  */
-app.use('/api/bookings', verifyJwtToken, createProxyMiddleware({
+app.use('/api/bookings', verifyJwtToken);
+app.use(createProxyMiddleware({
   target: BOOKING_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/bookings',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,
@@ -180,9 +203,11 @@ app.use('/api/bookings', verifyJwtToken, createProxyMiddleware({
  * Client URL:  http://localhost:8080/api/users/*
  * Target URL:  http://localhost:8084/api/users/*
  */
-app.use('/api/users', verifyJwtToken, createProxyMiddleware({
+app.use('/api/users', verifyJwtToken);
+app.use(createProxyMiddleware({
   target: USER_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/users',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,
@@ -196,9 +221,11 @@ app.use('/api/users', verifyJwtToken, createProxyMiddleware({
  * Client URL:  http://localhost:8080/api/payments/*
  * Target URL:  http://localhost:8085/api/payments/*
  */
-app.use('/api/payments', verifyJwtToken, createProxyMiddleware({
+app.use('/api/payments', verifyJwtToken);
+app.use(createProxyMiddleware({
   target: PAYMENT_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/payments',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,
@@ -208,13 +235,20 @@ app.use('/api/payments', verifyJwtToken, createProxyMiddleware({
 }));
 
 /**
- * Route 6: Notification Service (PROTECTED - Token Required)
+ * Route 6: Notification Service (Token Optional for GET testing)
  * Client URL:  http://localhost:8080/api/notifications/*
  * Target URL:  http://localhost:8086/api/notifications/*
  */
-app.use('/api/notifications', verifyJwtToken, createProxyMiddleware({
+app.use('/api/notifications', (req, res, next) => {
+  if (req.method === 'GET') {
+    return next();
+  }
+  return verifyJwtToken(req, res, next);
+});
+app.use(createProxyMiddleware({
   target: NOTIFICATION_SERVICE,
   changeOrigin: true,
+  pathFilter: '/api/notifications',
   onError: (err, req, res) => {
     res.status(502).json({
       success: false,

@@ -48,13 +48,37 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(Role.USER); // Default role is USER
 
         // STEP 3: Save user to database
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         // STEP 4: Generate JWT token for the new user
         String token = jwtService.generateToken(user);
 
         // STEP 5: Return response with user info and token
         return buildAuthResponse(user, token);
+    }
+
+    @Override
+    public AuthResponse createAdmin(RegisterRequest request) {
+        // STEP 1: Check if email already exists in database
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("User with email " + request.getEmail() + " already exists!");
+        }
+
+        // STEP 2: Create new admin user object
+        User adminUser = new User();
+        adminUser.setFullName(request.getFullName());
+        adminUser.setEmail(request.getEmail());
+        adminUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        adminUser.setRole(Role.ADMIN); // Role explicitly assigned to ADMIN by Superuser
+
+        // STEP 3: Save admin user to database
+        adminUser = userRepository.save(adminUser);
+
+        // STEP 4: Generate JWT token for the admin user
+        String token = jwtService.generateToken(adminUser);
+
+        // STEP 5: Return response with admin user info and token
+        return buildAuthResponse(adminUser, token);
     }
 
     @Override

@@ -83,13 +83,20 @@ public class NotificationService {
     }
 
     /**
-     * Retrieves all notifications for a specific user ID
+     * Retrieves all notifications for a specific user ID with intelligent fallback
      */
     public List<NotificationResponse> getNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUserIdOrderBySentAtDesc(userId)
+        List<NotificationResponse> list = notificationRepository.findByUserIdOrderBySentAtDesc(userId)
                 .stream()
                 .map(NotificationResponse::fromEntity)
                 .collect(Collectors.toList());
+
+        // If user has no specific notifications yet, return overall notification list as fallback
+        if (list.isEmpty()) {
+            return getAllNotifications();
+        }
+
+        return list;
     }
 
     /**

@@ -31,7 +31,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment processPayment(PaymentRequest request) {
-        String transactionId = generateUniqueTransactionId();
+        String transactionId = (request.getTransactionId() != null && !request.getTransactionId().isBlank())
+                ? request.getTransactionId()
+                : generateUniqueTransactionId();
 
         Payment payment = Payment.builder()
                 .transactionId(transactionId)

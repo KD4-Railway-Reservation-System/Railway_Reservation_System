@@ -18,8 +18,12 @@ import java.util.Optional;
 public interface TrainRepository extends JpaRepository<Train, Long> {
 
     /**
-     * Search trains matching source and destination stations (case-insensitive).
-     * Example SQL generated: SELECT * FROM trains WHERE LOWER(source_station) = LOWER(?) AND LOWER(destination_station) = LOWER(?)
+     * Search trains matching source and destination stations (case-insensitive substring match).
+     */
+    List<Train> findBySourceStationContainingIgnoreCaseAndDestinationStationContainingIgnoreCase(String source, String destination);
+
+    /**
+     * Search trains matching exact source and destination stations (case-insensitive).
      */
     List<Train> findBySourceStationIgnoreCaseAndDestinationStationIgnoreCase(String source, String destination);
 
@@ -37,4 +41,14 @@ public interface TrainRepository extends JpaRepository<Train, Long> {
      * Search trains arriving at a destination station keyword
      */
     List<Train> findByDestinationStationContainingIgnoreCase(String destination);
+
+    /**
+     * Check if train number already exists in database
+     */
+    boolean existsByTrainNumber(String trainNumber);
+
+    /**
+     * Check if train name already exists in database (case-insensitive)
+     */
+    boolean existsByTrainNameIgnoreCase(String trainName);
 }

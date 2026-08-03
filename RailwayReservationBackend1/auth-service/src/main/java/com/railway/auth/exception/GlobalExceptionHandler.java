@@ -40,7 +40,8 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        String firstError = errors.values().stream().findFirst().orElse("Invalid input data");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", firstError, "errors", errors));
     }
 }
 

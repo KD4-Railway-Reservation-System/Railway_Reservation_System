@@ -65,17 +65,70 @@ public class TrainController {
     }
 
     /**
-     * 3. Get Train by Database ID
+     * 2b. Get List of All Stations
+     * URL: GET http://localhost:8082/api/trains/stations
+     */
+    @GetMapping("/stations")
+    public ResponseEntity<List<Map<String, Object>>> getAllStations() {
+        List<Map<String, Object>> stations = trainService.getAllStations();
+        return ResponseEntity.ok(stations);
+    }
+
+
+    /**
+     * 3. Get Train by Database ID or Train Number or Index
      * Example URL: GET http://localhost:8082/api/trains/1
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTrainById(@PathVariable Long id) {
-        Optional<Train> train = trainService.getTrainById(id);
+    public ResponseEntity<?> getTrainById(@PathVariable String id) {
+        Optional<Train> train = trainService.getTrainByIdOrNumber(id);
         if (train.isPresent()) {
             return ResponseEntity.ok(train.get());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("success", false, "message", "Train not found with ID: " + id));
+                .body(Map.of("success", false, "message", "Train not found with ID or Train Number: " + id));
+    }
+
+    /**
+     * 3b. Book Seat Endpoint (Decrements availableSeats on train)
+     * Example URL: PUT http://localhost:8082/api/trains/1/book-seat?seats=1
+     */
+    @PutMapping("/{id}/book-seat")
+    public ResponseEntity<?> bookSeats(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "1") int seats) {
+        try {
+            Train updatedTrain = trainService.bookSeats(id, seats);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", seats + " seat(s) successfully booked!");
+            response.put("train", updatedTrain);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 3c. Cancel Seat Endpoint (Increments availableSeats on train)
+     * Example URL: PUT http://localhost:8082/api/trains/1/cancel-seat?seats=1
+     */
+    @PutMapping("/{id}/cancel-seat")
+    public ResponseEntity<?> cancelSeats(
+            @PathVariable String id,
+            @RequestParam(defaultValue = "1") int seats) {
+        try {
+            Train updatedTrain = trainService.cancelSeats(id, seats);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", seats + " seat(s) successfully restored!");
+            response.put("train", updatedTrain);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     /**
@@ -84,7 +137,7 @@ public class TrainController {
      */
     @GetMapping("/number/{trainNumber}")
     public ResponseEntity<?> getTrainByNumber(@PathVariable String trainNumber) {
-        Optional<Train> train = trainService.getTrainByNumber(trainNumber);
+        Optional<Train> train = trainService.getTrainByIdOrNumber(trainNumber);
         if (train.isPresent()) {
             return ResponseEntity.ok(train.get());
         }
@@ -97,14 +150,57 @@ public class TrainController {
      * URL: POST http://localhost:8082/api/trains
      */
     @PostMapping
-    public ResponseEntity<Map<String, Object>> addTrain(@RequestBody Train train) {
-        Train savedTrain = trainService.addTrain(train);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "Train successfully added!");
-        response.put("train", savedTrain);
+    public ResponseEntity<?> addTrain(@RequestBody Train train) {
+        try {
+            Train savedTrain = trainService.addTrain(train);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Train successfully added!");
+            response.put("train", savedTrain);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+    }
+
+    /**
+     * 6. Update Existing Train Route Details (Superuser / Admin Edit Endpoint)
+     * URL: PUT http://localhost:8082/api/trains/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTrain(@PathVariable Long id, @RequestBody Train updatedTrain) {
+        try {
+            Train savedTrain = trainService.updateTrain(id, updatedTrain);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Train details updated successfully!");
+            response.put("train", savedTrain);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    /**
+     * 7. Delete Train Route (Superuser / Admin Delete Endpoint)
+     * URL: DELETE http://localhost:8082/api/trains/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTrain(@PathVariable Long id) {
+        try {
+            trainService.deleteTrain(id);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Train route deleted successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "Failed to delete train route: " + e.getMessage()));
+        }
     }
 }

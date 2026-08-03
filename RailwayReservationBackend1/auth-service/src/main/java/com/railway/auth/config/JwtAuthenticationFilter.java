@@ -33,6 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        String method = request.getMethod();
+        return "OPTIONS".equalsIgnoreCase(method) || (path != null && path.startsWith("/api/auth"));
+    }
+
+    @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
@@ -49,38 +56,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // STEP 3: Extract the JWT token (remove "Bearer " prefix)
-        String token = authHeader.substring(7);
-        
-        // STEP 4: Extract email from token
-        String email = jwtService.extractEmail(token);
-        
-        // STEP 5: Check if email exists and user is not already authenticated
-        if (email != null && 
-            SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            // STEP 3: Extract the JWT token (remove "Bearer " prefix)
+            String token = authHeader.substring(7);
             
-            // STEP 6: Load user details from database using email
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            // STEP 4: Extract email from token
+            String email = jwtService.extractEmail(token);
             
-            // STEP 7: Validate the token
-            if (jwtService.validateToken(token, userDetails)) {
+            // STEP 5: Check if email exists and user is not already authenticated
+            if (email != null && 
+                SecurityContextHolder.getContext().getAuthentication() == null) {
                 
-                // STEP 8: Create authentication token
-                UsernamePasswordAuthenticationToken authToken = 
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,  // No credentials needed
-                        userDetails.getAuthorities()
+                // STEP 6: Load user details from database using email
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                
+                // STEP 7: Validate the token
+                if (jwtService.validateToken(token, userDetails)) {
+                    
+                    // STEP 8: Create authentication token
+                    UsernamePasswordAuthenticationToken authToken = 
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,  // No credentials needed
+                            userDetails.getAuthorities()
+                        );
+                    
+                    // STEP 9: Set request details
+                    authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
                     );
-                
-                // STEP 9: Set request details
-                authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                
-                // STEP 10: Set authentication in SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    
+                    // STEP 10: Set authentication in SecurityContext
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Log invalid/malformed token and continue to next filter (permitting public endpoints)
+            logger.error("Failed to authenticate JWT token: " + e.getMessage());
         }
         
         // STEP 11: Continue to next filter

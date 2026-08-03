@@ -6,5 +6,6 @@ import com.railway.auth.dto.RegisterRequest;
 
 public interface AuthService {
 	    AuthResponse register(RegisterRequest request);	    
+	    AuthResponse createAdmin(RegisterRequest request);
 	    AuthResponse login(LoginRequest request);
 }
