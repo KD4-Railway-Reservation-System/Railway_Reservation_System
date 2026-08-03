@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { bookingApi, paymentApi, notificationApi } from "../api/apiService";
+import { trainApi, bookingApi, paymentApi, notificationApi } from "../api/apiService";
 import PnrResultCard from "../components/PnrResultCard";
 import { Search, Ticket, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -73,6 +73,16 @@ export default function PnrStatusPage() {
       const res = await bookingApi.cancelBooking(pnr);
       const updatedBooking = res.data?.booking || res.data;
       setBooking(updatedBooking);
+
+      // Restore seat in train service
+      const trainIdentifier = booking?.trainId || booking?.trainNumber;
+      if (trainIdentifier) {
+        try {
+          await trainApi.cancelSeat(trainIdentifier);
+        } catch (sErr) {
+          console.log("Seat restoration notice", sErr);
+        }
+      }
 
       // 2. Process refund
       try {

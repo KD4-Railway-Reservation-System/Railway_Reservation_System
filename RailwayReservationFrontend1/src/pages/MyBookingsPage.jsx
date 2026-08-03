@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { bookingApi, paymentApi, notificationApi } from "../api/apiService";
+import { trainApi, bookingApi, paymentApi, notificationApi } from "../api/apiService";
 import { useAuth } from "../context/AuthContext";
 import StatusBadge from "../components/StatusBadge";
 import { downloadTicketPdf } from "../utils/pdfGenerator";
@@ -72,6 +72,15 @@ export default function MyBookingsPage() {
     try {
       // 1. Cancel ticket in Booking Service
       await bookingApi.cancelBooking(pnrNumber);
+
+      const targetBooking = bookings.find((b) => (b.pnrNumber || b.pnr) === pnrNumber);
+      if (targetBooking?.trainId || targetBooking?.trainNumber) {
+        try {
+          await trainApi.cancelSeat(targetBooking.trainId || targetBooking.trainNumber);
+        } catch (sErr) {
+          console.log("Seat restoration notice", sErr);
+        }
+      }
 
       // 2. Trigger auto refund in Payment Service
       try {

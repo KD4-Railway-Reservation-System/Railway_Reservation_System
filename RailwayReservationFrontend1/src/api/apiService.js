@@ -52,6 +52,8 @@ export const trainApi = {
   addTrain: (trainData) => axiosClient.post("/api/trains", trainData),
   updateTrain: (id, trainData) => axiosClient.put(`/api/trains/${id}`, trainData),
   deleteTrain: (id) => axiosClient.delete(`/api/trains/${id}`),
+  bookSeat: (id, seats = 1) => axiosClient.put(`/api/trains/${id}/book-seat?seats=${seats}`),
+  cancelSeat: (id, seats = 1) => axiosClient.put(`/api/trains/${id}/cancel-seat?seats=${seats}`),
 };
 
 // 3. Ticket Booking APIs (Booking Service - Port 8083)

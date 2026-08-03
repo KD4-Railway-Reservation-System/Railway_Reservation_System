@@ -85,6 +85,13 @@ export default function BookingPage() {
       const bookingResult = res.data?.booking || res.data;
       setCreatedBooking(bookingResult);
       saveBookingToLocalStorage(bookingResult);
+
+      // Decrement available seats in train service
+      try {
+        await trainApi.bookSeat(trainId);
+      } catch (seatErr) {
+        console.log("Notice: Seat update call", seatErr);
+      }
     } catch (err) {
       console.log("Booking error: Using client booking response", err);
       // Client-side fallback if offline
