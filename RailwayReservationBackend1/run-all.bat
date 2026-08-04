@@ -52,16 +52,16 @@ echo.
 echo ============================================================
 echo SUCCESS: ALL BACKEND SERVICES LAUNCHED IN SEPARATE WINDOWS!
 echo.
-echo 🌐 API Gateway:          http://localhost:8080
-echo 🩺 Gateway Health Check: http://localhost:8080/health
-echo 🔍 Eureka Dashboard:     http://localhost:8761
+echo API Gateway:          http://localhost:8080
+echo Gateway Health Check: http://localhost:8080/health
+echo Eureka Dashboard:     http://localhost:8761
 echo.
-echo 📚 SWAGGER UI DOCUMENTATION LINKS:
-echo 🔐 Auth Service Swagger:         http://localhost:8081/swagger-ui.html
-echo 🚆 Train Service Swagger:        http://localhost:8082/swagger-ui.html
-echo 🎫 Booking Service Swagger:      http://localhost:8083/swagger-ui.html
-echo 💳 Payment Service Swagger:      http://localhost:8085/swagger-ui.html
-echo 🔔 Notification Service Swagger: http://localhost:8086/swagger-ui.html
+echo SWAGGER UI DOCUMENTATION LINKS:
+echo Auth Service Swagger:         http://localhost:8081/swagger-ui.html
+echo Train Service Swagger:        http://localhost:8082/swagger-ui.html
+echo Booking Service Swagger:      http://localhost:8083/swagger-ui.html
+echo Payment Service Swagger:      http://localhost:8085/swagger-ui.html
+echo Notification Service Swagger: http://localhost:8086/swagger-ui.html
 echo ============================================================
 echo.
 pause
