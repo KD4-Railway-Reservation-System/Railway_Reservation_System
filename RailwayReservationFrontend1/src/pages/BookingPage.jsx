@@ -129,8 +129,14 @@ export default function BookingPage() {
   function saveBookingToLocalStorage(bookingObj) {
     try {
       const existing = JSON.parse(localStorage.getItem("railreserve_local_bookings") || "[]");
-      const filtered = existing.filter((b) => (b.pnrNumber || b.pnr) !== (bookingObj.pnrNumber || bookingObj.pnr));
-      filtered.unshift(bookingObj);
+      const completeBooking = {
+        ...bookingObj,
+        userEmail: bookingObj.userEmail || user?.email || "",
+        userId: bookingObj.userId || user?.userId || user?.id || null,
+        status: bookingObj.status || "CONFIRMED",
+      };
+      const filtered = existing.filter((b) => (b.pnrNumber || b.pnr) !== (completeBooking.pnrNumber || completeBooking.pnr));
+      filtered.unshift(completeBooking);
       localStorage.setItem("railreserve_local_bookings", JSON.stringify(filtered));
     } catch (e) {
       console.log("LocalStorage save error", e);
