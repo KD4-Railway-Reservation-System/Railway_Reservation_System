@@ -2,10 +2,7 @@
 
 A simple, easy-to-understand **API Gateway** built with **Node.js** and **Express.js** for the Railway Reservation System Microservices.
 
----
-
-## 💡 What is an API Gateway?
-
+## What is an API Gateway?
 An **API Gateway** is the single entry point ("front door") for your entire backend application.
 
 Instead of your frontend app (React, Mobile app) remembering separate ports for every service (Auth on `8081`, Trains on `8082`, Bookings on `8083`), the frontend connects to **one API Gateway port (`8080`)**.
@@ -19,21 +16,188 @@ Client App ---> API Gateway (Port 8080)
                      +---> User Service (Port 8084)    [Requires JWT]
 ```
 
----
-
-## 🌟 Key Features
+## Key Features
 
 1. **Request Logger**: Prints every request (`GET /api/trains`) in the terminal.
 2. **JWT Security Check**: Automatically verifies JWT Bearer tokens for private endpoints.
 3. **Request Proxying**: Automatically forwards requests to backend microservices using `http-proxy-middleware`.
 4. **Health Check**: Test URL at `http://localhost:8080/health`.
-5. **Simple Single-File Code**: Everything is located in [`src/server.js`](file:///c:/Users/rahul/OneDrive/Desktop/RailwayReservationBackend-antigravity/api-gateway/src/server.js) with easy line-by-line comments.
+5. **Simple Single-File Code**: Everything is located in [`src/server.js`]
+---
+
+## Directory Structure
+
+```# API Gateway (Beginner Guide)
+
+## What is an API Gateway?
+
+An API Gateway is the **main entry point** for all backend services.
+
+Instead of the frontend calling many different ports, it only calls **one port (8080)**.
+
+Example:
+
+```
+Frontend
+    |
+    v
+API Gateway (8080)
+    |
+    |--> Auth Service (8081)
+    |--> Train Service (8082)
+    |--> Booking Service (8083)
+    |--> User Service (8084)
+```
+
+So the frontend only remembers **one URL**:
+```
+http://localhost:8080
+```
 
 ---
 
-## 📁 Directory Structure
+# Features
+
+- Receives all requests from the frontend.
+- Sends requests to the correct microservice.
+- Checks JWT Token for protected APIs.
+- Shows request logs in the terminal.
+- Provides a Health Check API.
+
+---
+
+# Project Structure
 
 ```
+api-gateway/
+│
+├── .env
+├── package.json
+├── README.md
+│
+└── src/
+    └── server.js
+```
+
+- **.env** → Stores configuration.
+- **package.json** → Project dependencies.
+- **server.js** → Main API Gateway code.
+
+---
+
+# Install
+
+Move into the project folder.
+
+```bash
+cd api-gateway
+```
+
+Install all dependencies.
+
+```bash
+npm install
+```
+
+---
+
+# Run the Project
+
+Start the server.
+
+```bash
+npm start
+```
+
+For development (auto restart):
+
+```bash
+npm run dev
+```
+
+---
+
+# Test the API
+
+## 1. Health Check
+
+Open in browser:
+
+```
+http://localhost:8080/health
+```
+
+Expected Output:
+
+```json
+{
+  "status": "API Gateway Running"
+}
+```
+
+---
+
+## 2. Login API (Public)
+
+```
+POST http://localhost:8080/api/auth/login
+```
+
+Example Body:
+
+```json
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+```
+
+No JWT Token is required.
+
+---
+
+## 3. Train API (Protected)
+
+```
+GET http://localhost:8080/api/trains
+```
+
+Without JWT Token:
+
+```
+401 Unauthorized
+```
+
+With JWT Token:
+
+```
+Authorization: Bearer <your_token>
+```
+
+---
+
+# Flow
+
+```
+Frontend
+     |
+     v
+API Gateway
+     |
+     +--> Auth Service
+     +--> Train Service
+     +--> Booking Service
+     +--> User Service
+```
+
+---
+
+# Summary
+
+- Frontend talks only to the API Gateway.
+- API Gateway forwards requests to the correct microservice.
+- It checks JWT Tokens for protected APIs.
+- It makes communication between frontend and backend simple.
 api-gateway/
 ├── .env           # Environment variables (Port, JWT Secret, Microservice URLs)
 ├── .env.example   # Template environment file
@@ -45,7 +209,7 @@ api-gateway/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### 1. Install Dependencies
 ```bash
