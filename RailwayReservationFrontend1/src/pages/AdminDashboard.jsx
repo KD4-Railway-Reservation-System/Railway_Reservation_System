@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { trainApi, bookingApi } from "../api/apiService";
 import { useAuth } from "../context/AuthContext";
 import AdminTrainTab from "../components/admin/AdminTrainTab";
@@ -8,10 +8,17 @@ import AdminCreateAdminTab from "../components/admin/AdminCreateAdminTab";
 import { ShieldCheck, Train, Ticket, UserPlus } from "lucide-react";
 
 export default function AdminDashboard() {
-  const { isAuthenticated, isSuperUser, user } = useAuth();
+  const { isAuthenticated, isAdmin, isSuperUser, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState(() => (isSuperUser ? "CREATE_ADMIN" : "TRAINS"));
+  const rawTabQuery = searchParams.get("tab")?.toUpperCase();
+  const activeTab = isSuperUser
+    ? "CREATE_ADMIN"
+    : rawTabQuery === "BOOKINGS"
+    ? "BOOKINGS"
+    : "TRAINS";
+
   const [trains, setTrains] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,21 +28,19 @@ export default function AdminDashboard() {
       navigate("/login?redirect=/admin");
       return;
     }
-    loadAdminData();
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    if (isSuperUser && activeTab === "TRAINS" && trains.length === 0) {
-      // Keep default tab preference responsive
+    if (!isAdmin && !isSuperUser) {
+      navigate("/");
+      return;
     }
-  }, [isSuperUser]);
+    loadAdminData();
+  }, [isAuthenticated, isAdmin, isSuperUser, navigate]);
 
   async function loadAdminData() {
     setLoading(true);
     let trainList = [];
     let bookingList = [];
 
-    // 1. Fetch trains independently
+    // Fetch trains
     try {
       const tRes = await trainApi.getAllTrains();
       trainList = Array.isArray(tRes.data) ? tRes.data : (tRes.data?.trains || []);
@@ -43,7 +48,7 @@ export default function AdminDashboard() {
       console.log("Admin Data Notice: Error loading trains", tErr);
     }
 
-    // 2. Fetch bookings independently with local storage backup fallback
+    // Fetch bookings
     try {
       const bRes = await bookingApi.getAllBookings();
       bookingList = Array.isArray(bRes.data) ? bRes.data : (bRes.data?.bookings || []);
@@ -80,66 +85,64 @@ export default function AdminDashboard() {
             <span>{isSuperUser ? "Superuser Master Console" : "System Administrator Console"}</span>
           </div>
           <h2 className="text-2xl font-black text-white">
-            Railway Management Portal
+            {isSuperUser ? "Admin Account Provisioning Portal" : "Railway Express & Booking Portal"}
           </h2>
           <p className="text-xs text-blue-100 max-w-xl">
-            Logged in as <span className="font-bold text-amber-300">{user?.fullName || user?.email}</span> ({user?.role || (isSuperUser ? "SUPERUSER" : "ADMIN")}). Manage express trains, passenger bookings, and admin users.
+            Logged in as <span className="font-bold text-amber-300">{user?.fullName || user?.email}</span> ({isSuperUser ? "SUPERUSER" : "ADMIN"}).{" "}
+            {isSuperUser
+              ? "Superuser Role: Create and manage Administrator Email IDs and passwords."
+              : "Admin Role: Add express trains, manage routes/fares, and oversee passenger bookings."}
           </p>
         </div>
 
         {/* Tab Switcher */}
         <div className="flex bg-slate-900/60 backdrop-blur-md p-1.5 rounded-xl gap-1.5 text-xs font-bold border border-white/10 w-full md:w-auto overflow-x-auto">
-          {isSuperUser && (
-            <button
-              onClick={() => setActiveTab("CREATE_ADMIN")}
-              className={`px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 ${
-                activeTab === "CREATE_ADMIN"
-                  ? "bg-amber-400 text-slate-950 font-black shadow-md"
-                  : "text-blue-100 hover:bg-white/10 hover:text-white"
-              }`}
-            >
+          {isSuperUser ? (
+            <div className="px-4 py-2.5 bg-amber-400 text-slate-950 font-black rounded-lg flex items-center space-x-2 shadow-md">
               <UserPlus className="w-4 h-4" />
-              <span>Create Admin</span>
-            </button>
+              <span>Create Admin Only</span>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => setSearchParams({ tab: "TRAINS" })}
+                className={`px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 ${
+                  activeTab === "TRAINS"
+                    ? "bg-amber-400 text-slate-950 font-black shadow-md"
+                    : "text-blue-100 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <Train className="w-4 h-4" />
+                <span>Add & Manage Trains ({trains.length})</span>
+              </button>
+
+              <button
+                onClick={() => setSearchParams({ tab: "BOOKINGS" })}
+                className={`px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 ${
+                  activeTab === "BOOKINGS"
+                    ? "bg-amber-400 text-slate-950 font-black shadow-md"
+                    : "text-blue-100 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <Ticket className="w-4 h-4" />
+                <span>Bookings Overview ({bookings.length})</span>
+              </button>
+            </>
           )}
-
-          <button
-            onClick={() => setActiveTab("TRAINS")}
-            className={`px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 ${
-              activeTab === "TRAINS"
-                ? "bg-amber-400 text-slate-950 font-black shadow-md"
-                : "text-blue-100 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            <Train className="w-4 h-4" />
-            <span>Trains ({trains.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("BOOKINGS")}
-            className={`px-4 py-2.5 rounded-lg transition-all flex items-center space-x-2 shrink-0 ${
-              activeTab === "BOOKINGS"
-                ? "bg-amber-400 text-slate-950 font-black shadow-md"
-                : "text-blue-100 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            <Ticket className="w-4 h-4" />
-            <span>Bookings ({bookings.length})</span>
-          </button>
         </div>
       </div>
 
       {/* Active Tab View */}
-      {activeTab === "CREATE_ADMIN" && <AdminCreateAdminTab />}
+      {isSuperUser && <AdminCreateAdminTab />}
 
-      {activeTab === "TRAINS" && (
+      {!isSuperUser && activeTab === "TRAINS" && (
         <AdminTrainTab
           trains={trains}
           onDataChange={loadAdminData}
         />
       )}
 
-      {activeTab === "BOOKINGS" && <AdminBookingTab bookings={bookings} />}
+      {!isSuperUser && activeTab === "BOOKINGS" && <AdminBookingTab bookings={bookings} />}
     </div>
   );
 }

@@ -159,8 +159,23 @@ export function AuthProvider({ children }) {
   }
 
   const roleUpper = (user?.role || "").toUpperCase();
-  const isAdmin = roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN" || roleUpper === "SUPERUSER" || roleUpper === "ROLE_SUPERUSER";
-  const isSuperUser = roleUpper === "SUPERUSER" || roleUpper === "ROLE_SUPERUSER" || (user?.email || "").toLowerCase().includes("superuser") || (user?.email || "").toLowerCase() === "rahul1234@gmail.com" || (user?.email || "").toLowerCase() === "rahul1234@gmail";
+  const cleanEmail = (user?.email || "").toLowerCase().trim();
+
+  const isSuperUser =
+    roleUpper === "SUPERUSER" ||
+    roleUpper === "ROLE_SUPERUSER" ||
+    cleanEmail.includes("superuser") ||
+    cleanEmail === "rahul1234@gmail.com" ||
+    cleanEmail === "rahul1234@gmail";
+
+  const isOnlyAdmin =
+    !isSuperUser &&
+    (roleUpper === "ADMIN" ||
+      roleUpper === "ROLE_ADMIN" ||
+      cleanEmail === "rahul123@gmail.com");
+
+  const isAdmin = isOnlyAdmin || isSuperUser;
+  const isStandardUser = !!user && !isAdmin && !isSuperUser;
 
   const value = {
     user,
@@ -171,7 +186,9 @@ export function AuthProvider({ children }) {
     logout,
     isAuthenticated: !!user,
     isAdmin,
+    isOnlyAdmin,
     isSuperUser,
+    isStandardUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

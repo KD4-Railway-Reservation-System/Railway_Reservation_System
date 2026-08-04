@@ -3,9 +3,10 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  // Available themes: "bright" | "dark" | "night"
+  // 2 Themes: "light" | "dark"
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("railreserve_theme") || "bright";
+    const saved = localStorage.getItem("railreserve_theme");
+    return saved === "dark" ? "dark" : "light";
   });
 
   useEffect(() => {
@@ -13,18 +14,22 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute("data-theme", theme);
     
     // Apply body theme class
-    document.body.classList.remove("theme-dark", "theme-night", "theme-cream");
+    document.body.classList.remove("theme-dark", "theme-light", "theme-bright", "theme-night");
     document.body.classList.add(`theme-${theme}`);
   }, [theme]);
 
   const changeTheme = (newTheme) => {
-    if (["dark", "night", "cream"].includes(newTheme)) {
+    if (newTheme === "dark" || newTheme === "light") {
       setTheme(newTheme);
     }
   };
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme }}>
+    <ThemeContext.Provider value={{ theme, changeTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

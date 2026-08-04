@@ -10,7 +10,7 @@ export default function HomePage() {
   const [sourceId, setSourceId] = useState("");
   const [destinationId, setDestinationId] = useState("");
   const [journeyDate, setJourneyDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().substring(0, 10)
   );
   const [seatClass, setSeatClass] = useState("ALL");
   const [quota, setQuota] = useState("GENERAL");

@@ -177,28 +177,6 @@ export default function AdminTrainTab({ trains, onDataChange }) {
 
   return (
     <div className="space-y-6">
-      {/* Superuser Banner */}
-      {isSuperUser && (
-        <div className="bg-gradient-to-r from-amber-950/70 via-slate-900 to-indigo-950/70 border border-amber-500/40 rounded-2xl p-4 flex items-center justify-between shadow-xl">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-lg">
-              👑
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-amber-300 flex items-center gap-2">
-                <span>SUPERUSER CONTROL PANEL ACTIVATED</span>
-                <span className="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded font-mono uppercase font-bold">
-                  Elevated Rights
-                </span>
-              </h3>
-              <p className="text-xs text-slate-300">
-                Full authority enabled: Edit train paths/numbers/names and permanently delete routes.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Add Train Form */}
         <div className="bg-slate-900 border border-slate-700 text-white p-5 rounded-2xl space-y-4 shadow-xl">
@@ -331,7 +309,7 @@ export default function AdminTrainTab({ trains, onDataChange }) {
               Active Train Routes ({trains.length})
             </h3>
             <span className="text-[11px] text-slate-400">
-              {isSuperUser ? "👑 Superuser Mode: Full Edit & Delete Unlocked" : "Standard Admin Controls"}
+              Administrator Train Controls: Full Edit & Delete Unlocked
             </span>
           </div>
 
