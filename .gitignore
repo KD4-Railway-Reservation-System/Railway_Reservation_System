@@ -18,3 +18,9 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# H2 Embedded Database files
+*.mv.db
+*.trace.db
+**/data/
+
