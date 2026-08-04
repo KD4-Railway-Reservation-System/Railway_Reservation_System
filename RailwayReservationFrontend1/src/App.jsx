@@ -8,7 +8,7 @@ export default function App() {
     <div>
       <Navbar />
       <Router></Router>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

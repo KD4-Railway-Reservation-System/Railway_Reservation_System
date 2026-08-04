@@ -90,6 +90,7 @@ export default function TrainSearchForm({
             <input
               type="date"
               value={journeyDate}
+              min={new Date().toISOString().split("T")[0]}
               onChange={(e) => setJourneyDate(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition"
             />

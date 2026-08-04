@@ -51,6 +51,12 @@ export default function HomePage() {
     e.preventDefault();
     setErrorMsg("");
 
+    const today = new Date().toISOString().substring(0, 10);
+    if (journeyDate && journeyDate < today) {
+      setErrorMsg("Journey date cannot be in the past. Please select today or a future date.");
+      return;
+    }
+
     if (sourceId && destinationId && sourceId === destinationId) {
       setErrorMsg("Source and Destination stations cannot be the same.");
       return;

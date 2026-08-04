@@ -57,8 +57,15 @@ export default function BookingPage() {
 
   async function handleBookTicket(e) {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+
+    const today = new Date().toISOString().split("T")[0];
+    if (journeyDate < today) {
+      setError("Journey date cannot be in the past. Please select today or a future date.");
+      return;
+    }
+
+    setSubmitting(true);
 
     const fare = calculateFare();
     const sourceStation = train?.sourceStation || train?.source || "Origin";
